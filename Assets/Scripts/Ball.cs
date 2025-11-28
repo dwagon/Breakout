@@ -9,12 +9,19 @@ public class Ball : MonoBehaviour
     [SerializeField] float timeTillBrickDeletes = 4f;
     [SerializeField] float timeTillBrickDrops = 2f;
     [SerializeField] GameObject bat;
+    [SerializeField] int scorePerBrick = 10;
+    [SerializeField] int scoreAcceleration = 10;
+
     Rigidbody2D m_rigidbody;
+    Player m_player;
     bool isOffScreenHandled = false;
+    int currScorePerBrick = 0;
 
     void Start()
     {
         m_rigidbody = GetComponent<Rigidbody2D>();
+        m_player = FindAnyObjectByType<Player>();
+        currScorePerBrick = scorePerBrick;
     }
 
     void Update()
@@ -40,16 +47,27 @@ public class Ball : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Brick"))
         {
-            StartCoroutine(DropBrick(collision.gameObject));
-            StartCoroutine(DeleteBrick(collision.gameObject));
+            HitBrick(collision);
         }
         else if (collision.gameObject.CompareTag("Player"))
         {
+            currScorePerBrick = scorePerBrick;
             ContactPoint2D[] contacts = new ContactPoint2D[1];
             collision.GetContacts(contacts);
             BatHit(contacts[0].point);
         }
     }
+
+    void HitBrick(Collision2D collision)
+    {
+
+        m_player.AddScore(currScorePerBrick);
+        currScorePerBrick += scoreAcceleration;
+
+        StartCoroutine(DropBrick(collision.gameObject));
+        StartCoroutine(DeleteBrick(collision.gameObject));
+    }
+
 
     void BatHit(Vector2 hitPoint)
     {
