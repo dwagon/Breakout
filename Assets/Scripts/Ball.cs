@@ -1,13 +1,10 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections;
 using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    [SerializeField] float timeTillBrickDeletes = 4f;
-    [SerializeField] float timeTillBrickDrops = 2f;
+
     [SerializeField] GameObject bat;
     [SerializeField] int scorePerBrick = 10;
     [SerializeField] int scoreAcceleration = 10;
@@ -60,12 +57,14 @@ public class Ball : MonoBehaviour
 
     void HitBrick(Collision2D collision)
     {
+        Brick brick;
 
-        m_player.AddScore(currScorePerBrick);
-        currScorePerBrick += scoreAcceleration;
-
-        StartCoroutine(DropBrick(collision.gameObject));
-        StartCoroutine(DeleteBrick(collision.gameObject));
+        brick = collision.gameObject.GetComponent<Brick>();
+        if (brick.Hit())
+        {
+            m_player.AddScore(currScorePerBrick);
+            currScorePerBrick += scoreAcceleration;
+        }
     }
 
 
@@ -83,23 +82,6 @@ public class Ball : MonoBehaviour
             force = -transform.right;
         }
         m_rigidbody.AddForce(5 * difference * force, ForceMode2D.Impulse);
-    }
-
-
-    IEnumerator DropBrick(GameObject brick)
-    {
-        brick.GetComponentInChildren<SpriteRenderer>().color = Color.green;
-        yield return new WaitForSeconds(timeTillBrickDrops);
-        if (brick != null)
-        {
-            brick.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
-        }
-    }
-
-    IEnumerator DeleteBrick(GameObject brick)
-    {
-        yield return new WaitForSeconds(timeTillBrickDeletes);
-        Destroy(brick);
     }
 
     bool IsOffScreen()
